@@ -27,7 +27,15 @@ RUN apt-get install -y \
     vim \
     docker-ce \
     docker-ce-cli \
-    containerd.io
+    containerd.io \
+    python3-pip \
+    python3-setuptools \
+    groff \
+    less \
+    && pip3 install --upgrade pip \
+    && apt-get clean
+
+RUN pip3 --no-cache-dir install --upgrade awscli
 
 RUN usermod -aG docker,staff jenkins
 
