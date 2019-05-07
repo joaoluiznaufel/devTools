@@ -19,3 +19,4 @@ services:
     volumes:
       - ~/jenkins:/var/jenkins_home
       - ~/.ssh:/var/jenkins_home/.ssh
+      - ~/.aws:/var/jenkins_home/.aws
