@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+
+  ### nginx
+  dev:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    hostname: nginx
+    container_name: just-play_nginx
+    links:
+      - fpm:php
+    ports:
+      - 8000:80
+    volumes:
+      - ./api:/opt/webapp
+
+  ### php 7.1 with fpm - linked with nginx
+  fpm:
+    build:
+      context: php-fpm
+      dockerfile: Dockerfile
+    hostname: fpm
+    volumes:
+      - ./api:/opt/webapp
+    command: composer create-project symfony/website-skeleton .
