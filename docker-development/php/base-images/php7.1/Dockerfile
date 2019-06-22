@@ -21,7 +21,7 @@ RUN \
     docker-php-ext-configure zip
 
 RUN \
-    pecl install mongodb && \
+    pecl install mongodb-1.5.5 && \
     pecl install xdebug-2.5.5 \
     pecl clear-cache
 
