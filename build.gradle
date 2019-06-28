@@ -1,0 +1,39 @@
+final BUILD_GROUP = '__ Build __'
+final DEPLOY_GROUP = '__ Deploy __'
+
+final DOCKER_NAMESPACE = 'joaoluiznaufel/'
+
+/**
+ * Write local configuration file for Docker Compose
+ */
+task buildImage {
+    description = 'Build image'
+    group = BUILD_GROUP
+
+    doLast {
+        println "Build image ${DOCKER_NAMESPACE}base-${image}:${tag}"
+        exec {
+            workingDir "./docker-development/${dir}"
+            executable 'docker'
+            args 'build', '--no-cache', '-t', "${DOCKER_NAMESPACE}base-${image}:${tag}", '-t', "${DOCKER_NAMESPACE}base-${image}:latest", '.'
+        }
+    }
+}
+
+task push {
+    description = 'Push image'
+    group = DEPLOY_GROUP
+
+    doLast {
+        println "Push image ${DOCKER_NAMESPACE}base-${image}:${tag}"
+        exec {
+            executable 'docker'
+            args 'push', "${DOCKER_NAMESPACE}base-${image}:${tag}"
+        }
+
+        exec {
+            executable 'docker'
+            args 'push', "${DOCKER_NAMESPACE}base-${image}:latest"
+        }
+    }
+}
