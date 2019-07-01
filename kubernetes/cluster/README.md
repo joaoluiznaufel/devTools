@@ -1,58 +1,69 @@
-The Master is responsible for managing the cluster.
+How to install kubernetes in two ubuntu nodes
 
-A node is a VM or a physical computer that serves as a worker machine in a Kubernetes cluster.
+Let's do two nodes, one for master and another one for a simple node
 
-**Initializing the cluster**
+What is your hardware?
+2 GB or more of RAM per machine. Any less leaves little room for your apps.
+2 CPUs or more on the control-plane node
+Full network connectivity among all machines in the cluster. A public or private network is fine.
 
-The first stage of initialising the cluster is to launch the master node. The master is responsible for running the control plane components, etcd and the API server. Clients will communicate to the API to schedule workloads and manage the state of the cluster.
+1 - Before install kubernetes
 
-`kubeadm init --token=102952.1a7dd4cc8d1f4cc5 --kubernetes-version $(kubeadm version -o short)`
+1.1 - install docker in both nodes
+```
+sudo apt install docker.io
+```
 
-To manage the Kubernetes cluster, the client configuration and certificates are required. This configuration is created when kubeadm initialises the cluster.
+1.2 - Enable docker with sudo systemctl
+```
+sudo systemctl enable docker
+```
 
-**Deploy Container Networking Interface (CNI)**
+1.3 - Add kubernetes signed key on both the nodes
+```
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+```
 
-Using weaveNet https://www.weave.works/oss/net/
+1.4 - Add kubernetes repository
+```
+sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+```
 
-`kubectl apply -f /opt/weave-kube`
+1.5 - Install kubeadm on all nodes
+What is kubeadm? The command to bootstrap the cluster.
+Kubeadm also supports other cluster lifecycle functions, such as upgrades, downgrade, and managing bootstrap tokens.
+```
+sudo apt install kubeadm
+```
 
-`kubectl get pod -n kube-system`
+1.6 - Disable swap memory on both nodes
+```
+sudo swapoff -a
+```
 
-**Join Cluster**
+1.7 - Unique hostnames to each node
+```
+sudo hostnamectl set-hostname master-node
+```
+and 
+```
+hostnamectl set-hostname slave-node
+```
 
-`kubeadm token list`
+1.8 - Initialize Kubernetes on the master node
+```
+sudo kubeadm init
+```
 
-`kubeadm join --discovery-token-unsafe-skip-ca-verification --token=102952.1a7dd4cc8d1f4cc5 172.17.0.9:6443`
+1.9 - To start using your cluster, you need to run the following as a regular user:
+```
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
 
-The --discovery-token-unsafe-skip-ca-verification tag is used to bypass the Discovery Token verification. As this token is generated dynamically, we couldn't include it within the steps. When in production, use the token provided by kubeadm init.
-
-**Deploy dashboard**
-
-create a dashboard
-
-`cat <<EOF | kubectl create -f - 
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: admin-user
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: admin-user
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: admin-user
-  namespace: kube-system
-EOF`
-
-
-`kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')`
-
-
-
+2.0 - You should now deploy a pod network to the cluster.
+```
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+/docs/concepts/cluster-administration/addons/
+```
