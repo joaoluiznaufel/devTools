@@ -1,0 +1,34 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: name-of-the-cron
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+            - name: script
+              configMap:
+                name: config-map-my-script
+          containers:
+            - name: name-of-the-container
+              image: repository/name-of-image
+              command: ["php"]
+              args: ["/opt/my-script.php"]
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 400Mi
+                requests:
+                  cpu: 300m
+                  memory: 200Mi
+              volumeMounts:
+                - name: script
+                  mountPath: /opt/my-script.php
+                  subPath: my-script.php

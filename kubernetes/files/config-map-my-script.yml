@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  my-script.php: |
+    <?php
+      echo "Hello, I am a script";
+    ?>
+kind: ConfigMap
+metadata:
+  name: config-map-my-script
+  namespace: default
