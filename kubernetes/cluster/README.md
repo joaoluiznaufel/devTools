@@ -52,7 +52,7 @@ hostnamectl set-hostname slave-node
 
 1.8 - Initialize Kubernetes on the master node
 ```
-sudo kubeadm init
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
 1.9 - To start using your cluster, you need to run the following as a regular user:
@@ -62,8 +62,36 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-2.0 - You should now deploy a pod network to the cluster.
+2.0 - You should now deploy a pod network to the cluster. I choose calico
 ```
-Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
-/docs/concepts/cluster-administration/addons/
+kubectl apply -f https://docs.projectcalico.org/v3.7/manifests/calico.yaml
+```
+Other network policies
+Canal, AWS VPC, Flannel, Weave Net
+
+2.1 - Now its time to join nodes
+To be able to do this:
+ - SSH to the machine
+ - Become root (sudo su -)
+ - Run the command that was output by kubeadm init.
+ 
+ ```
+ kubeadm join --token <token> <master-ip>:<master-port> --discovery-token-ca-cert-hash sha256:<hash>
+ ```
+ 
+If you do not have the token, you can get it by running the following command on the control-plane node:
+
+```
+kubeadm token list
+```
+
+By default, tokens expire after 24 hours. If you need to create a new one:
+```
+kubeadm token create
+```
+
+If you don’t have the value of --discovery-token-ca-cert-hash, you can get it by running the following command chain on the control-plane node:
+```
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
+   openssl dgst -sha256 -hex | sed 's/^.* //'
 ```
