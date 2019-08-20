@@ -40,9 +40,19 @@ RUN apt-get install -y \
     && pip3 install --upgrade pip \
     && apt-get clean
 
+RUN curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+
+RUN chmod +x ~/docker-compose
+
+RUN mv ~/docker-compose /usr/local/bin/docker-compose
+
+RUN chmod g+s /usr/local/bin/docker-compose
+
 RUN pip3 --no-cache-dir install --upgrade awscli
 
-RUN usermod -aG docker,staff jenkins
+RUN pip3 --no-cache-dir install --upgrade ansible
+
+RUN usermod -aG docker jenkins
 
 RUN chmod g+s /usr/bin/docker
 

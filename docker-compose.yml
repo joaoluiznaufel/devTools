@@ -20,5 +20,4 @@ services:
       - ~/jenkins:/var/jenkins_home
       - ~/.ssh:/var/jenkins_home/.ssh
       - ~/.aws:/var/jenkins_home/.aws
-      - ~/.docker:/var/jenkins_home/.docker
       - /var/run/docker.sock:/var/run/docker.sock
